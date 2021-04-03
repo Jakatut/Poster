@@ -16,8 +16,6 @@ class CreatePostTable extends Migration
         Schema::create('post', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('title');
-            $table->string('summary');
             $table->mediumText('body');
             $table->string('image')->nullable();
         });
