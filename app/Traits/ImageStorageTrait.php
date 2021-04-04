@@ -14,10 +14,10 @@ trait ImageStorageTrait {
      * @param String         $oldImage
      * @return String
      */
-    public function saveImageToStorage($image, $removeOld = false, $oldImage = '', $imageFolder = '/awfImages/') {
+    public function saveImageToStorage($image, $removeOld = false, $oldImage = '', $imageFolder = '/awfImages/', $filesystem = 'local') {
         $url = '';
         if ($image->isValid()) {
-            $disk = Storage::disk('local');
+            $disk = Storage::disk($filesystem);
             if ($removeOld && !empty($oldImage)) {
                 
                 $disk->delete($this->getStorageImageName($oldImage, $imageFolder));

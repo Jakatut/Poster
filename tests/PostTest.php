@@ -1,10 +1,9 @@
 <?php
 
-use Database\Factories\UserFactory;
+use App\Traits\ImageStorageTrait;
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Auth;
-
+use App\Models\Post;
 
 class PostTest extends TestCase
 {
@@ -12,16 +11,29 @@ class PostTest extends TestCase
 
     use DatabaseMigrations;
     use DatabaseTransactions;
+    use ImageStorageTrait;
 
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
     public function testCreatePost_Success()
     {
-        $this->getToken();
+        $postData = [
+            'body' => 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Suscipit iure quasi recusandae vitae cupiditate odio reiciendis eos id, tenetur facilis enim quod, perspiciatis distinctio repellendus aperiam optio, illo in delectus.'
+        ];
+
+        $this->postMultipartFormData(self::POST_ENDPOINT, $postData, [], $this->getToken());
+        $this->assertResponseOk();
     }
 
+    public function testCreatePost_Fail_Invalid_Body() {
+        $postData = [
+            'body' => '',
+        ];
+        $this->postMultipartFormData(self::POST_ENDPOINT, $postData, [], $this->getToken());
+        $this->assertResponseStatus(422);
+    }
 
+    public function testUpdatePost_Success() {
+        $post = Post::factory()->create();
+        $this->putMultipartFormData(self::POST_ENDPOINT . $post->id . '?', ['body' => 'Hello! This is the new body!'], [], $this->getToken());
+        $this->assertResponseStatus(204);
+    }
 }

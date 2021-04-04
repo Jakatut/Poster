@@ -1,14 +1,19 @@
 <?php
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    use HasFactory;
+    use DatabaseMigrations;
 
     const FORM_DATA = 'multipart/form-data;';
     const REGISTER_ENDPOINT = '/api/register';
     const LOGIN_ENDPOINT = '/api/login';
 
+    public $authToken = null;
 
     /**
      * Creates the application.
@@ -17,7 +22,7 @@ abstract class TestCase extends BaseTestCase
      */
     public function createApplication()
     {
-        return require __DIR__.'/../bootstrap/app.php';
+        return require __DIR__.'/bootstrap.php';
     }
 
     public function getToken() {
@@ -29,11 +34,14 @@ abstract class TestCase extends BaseTestCase
         ];
         $this->postMultipartFormData(self::REGISTER_ENDPOINT, $registrationFormData);
         $this->postMultipartFormData(self::LOGIN_ENDPOINT, $registrationFormData);
-        $token = json_decode($this->response->getContent())->token;
-        return $token;
+        $this->authToken = json_decode($this->response->getContent())->token;
     }
 
-    public function postMultipartFormData($uri, $data, $token = '') {
-        $this->call('POST', $uri, $data, [], [], [], self::FORM_DATA)->header('Authorization', 'bearer ' . $token);
+    public function postMultipartFormData($uri, $data, $files = [], $token = '') {
+        $this->call('POST', $uri, $data, [], $files, [], self::FORM_DATA)->header('Authorization', 'bearer ' . $this->authToken);
+    }
+
+    public function putMultipartFormData($uri, $data, $files = [], $token = '') {
+        $this->call('PUT', $uri, $data, [], $files, [], self::FORM_DATA)->header('Authorization', 'bearer ' . $this->authToken);
     }
 }

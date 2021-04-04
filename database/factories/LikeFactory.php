@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Models\Like;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class UserFactory extends Factory
+class LikeFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = User::class;
+    protected $model = Like::class;
 
     /**
      * Define the model's default state.
@@ -22,9 +22,8 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name,
-            'email' => $this->faker->unique()->email,
-            'password' => $this->faker->password(),
+            'user_id' => random_int(1, 10),
+            'post_id' => random_int(1, 100),
         ];
     }
 }

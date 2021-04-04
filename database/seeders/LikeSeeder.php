@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Like;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+class LikeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call('UsersTableSeeder');
+        Like::factory(35)->create();
     }
 }
