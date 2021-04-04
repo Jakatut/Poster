@@ -8,12 +8,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 
-function is_gae()
-{
-    return !file_exists(__DIR__ . '/../.env');
-}
-
-
 /*
 |--------------------------------------------------------------------------
 | Create The Application
