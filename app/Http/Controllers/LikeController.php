@@ -43,8 +43,8 @@ class LikeController extends Controller
 
         // Check if the like already exists.
         $likeData = ['user_id' => $user->id, 'post_id' => $postId];
-        $like = Like::find($likeData);
-        if (!empty($like)) {
+        $exists = Like::select('id')->where([['user_id', '=', $user->id], ['post_id', '=', $postId]])->exists();
+        if ($exists) {
             return new Response('', 200);
         }
 
