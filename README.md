@@ -1,9 +1,9 @@
 # Social Media/blog API
 
-A simple blog api allowing users to preform basic CRUD operations on a blog post.
-Users can add images to the blog post which are stored on Google Cloud Storage.
+A simple PHP API using the Laravel Lumen framework
+Image storage in disk is available, with storage in Google Cloud Storage supported. Automated tests can be run using phpunit.
 
-Posts can be liked and commented on.
+Post can be created with a body and image. Posts can also be commented on and liked.
 
 ## Setup
 
