@@ -57,7 +57,7 @@ class PostController extends Controller
     {
         $posts = Post::all();
         if (count($posts) == 0) {
-            return new Response('', 404);
+            return new Response('Posts not found.', 404);
         }
         return new JsonResponse($posts, 200);
     }
@@ -72,7 +72,7 @@ class PostController extends Controller
     {
         $post = Post::find($id);
         if (empty($post)) {
-            return new Response('', 404);
+            return new Response('Post not found.', 404);
         }
 
         return new JsonResponse($post, 200);
@@ -91,7 +91,7 @@ class PostController extends Controller
         $post = Post::find($id);
 
         if (empty($post)) {
-            return new Response('', 404);
+            return new Response('Post not found.', 404);
         }
 
         // If an image was provided, save it to cloud storage and delete the previous image.        
@@ -113,10 +113,9 @@ class PostController extends Controller
      */
     public function delete($id)
     {
-
         $post = Post::find($id);
         if (!$post) {
-            return new Response('', 404);
+            return new Response('Post not found.', 404);
         }
 
         $post->delete();
@@ -136,5 +135,4 @@ class PostController extends Controller
             'image' => 'nullable|image',
         ]);
     }
-
 }

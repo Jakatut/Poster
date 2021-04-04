@@ -44,28 +44,21 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->post('/{id}/comment', 'CommentController@create');
 
         // Get all comments on a post.
-        $router->get('/{id}/comments', 'CommentController@find');
+        $router->get('/{id}/comment', 'CommentController@find');
 
         // Create a like on a post.
-        $router->post('/{id}/like', 'LikeController@create');
+        $router->post('/{postId}/like', 'LikeController@create');
 
         // Get all likes on a post.
-        $router->get('/{id}/likes', 'LikeController@find');
-
-    });
-
-    $router->group(['prefix' => 'like'], function () use ($router) {
-        
-        // Delete a like.
-        $router->delete('/{id}', 'LikeController@delete');
-    });
-
-    $router->group(['prefix' => 'comment'], function () use ($router) {
+        $router->get('/{postId}/like', 'LikeController@find');
+    
+        // Delete a like by id.
+        $router->delete('/like/{id}', 'LikeController@delete');
 
         // Update a comment.
-        $router->put('/{id}', 'CommentController@update');
+        $router->put('/comment/{id}', 'CommentController@update');
 
         // Delete a comment.
-        $router->delete('/{id}', 'CommentController@delete');
+        $router->delete('/comment/{id}', 'CommentController@delete');
     });
 });

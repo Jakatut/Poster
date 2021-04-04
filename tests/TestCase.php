@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\TestCase as BaseTestCase;
@@ -13,7 +14,13 @@ abstract class TestCase extends BaseTestCase
     const REGISTER_ENDPOINT = '/api/register';
     const LOGIN_ENDPOINT = '/api/login';
 
-    public $authToken = null;
+    protected static $migrationsRun = false;
+
+    protected $loggedInUser;
+
+    protected $user;
+
+    protected $headers;
 
     /**
      * Creates the application.
@@ -22,26 +29,56 @@ abstract class TestCase extends BaseTestCase
      */
     public function createApplication()
     {
-        return require __DIR__.'/bootstrap.php';
+        return require __DIR__ . '/../bootstrap/app.php';
     }
 
-    public function getToken() {
-        $registrationFormData = [
-            'name' => 'user',
-            'email' => 'user@user.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+    public function setUp(): void
+    {
+        parent::setup();
+
+        if (!static::$migrationsRun) {
+            $this->artisan('migrate:refresh');
+            $this->artisan('db:seed');
+            static::$migrationsRun = true;
+        }
+
+        $users = User::factory(\App\Models\User::class)->times(2)->create();
+        
+        $this->loggedInUser = $users[0];
+        $this->user = $users[1];
+        $this->headers = [
+            'Authorization' => "Token {$this->loggedInUser->token}"
         ];
-        $this->postMultipartFormData(self::REGISTER_ENDPOINT, $registrationFormData);
-        $this->postMultipartFormData(self::LOGIN_ENDPOINT, $registrationFormData);
-        $this->authToken = json_decode($this->response->getContent())->token;
     }
 
-    public function postMultipartFormData($uri, $data, $files = [], $token = '') {
-        $this->call('POST', $uri, $data, [], $files, [], self::FORM_DATA)->header('Authorization', 'bearer ' . $this->authToken);
+    protected function postMultipartFormData($uri, $data = [], $files = [], $headers = [])
+    {
+        $server = $this->transformHeadersToServerVars($headers);
+        $this->call('POST', $uri, $data, [], $files, $server, self::FORM_DATA);
+        return $this;
     }
 
-    public function putMultipartFormData($uri, $data, $files = [], $token = '') {
-        $this->call('PUT', $uri, $data, [], $files, [], self::FORM_DATA)->header('Authorization', 'bearer ' . $this->authToken);
+    protected function putMultipartFormData($uri, $data = [], $files = [], $headers = [])
+    {
+        if (str_contains($uri, '?')) {
+            $uri = $uri . '&_method=PUT';
+        } else {
+            $uri = $uri . '?_method=PUT';
+        }
+        
+        $this->call('PUT', $uri, $data, [], $files, $headers, self::FORM_DATA);
+        return $this;
+    }
+
+    protected function authHeaders($user = null)
+    {
+        $headers = [];
+
+        if (!is_null($user)) {
+            $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
+            $headers['authorization'] = 'Bearer ' . $token;
+        }
+
+        return $headers;
     }
 }

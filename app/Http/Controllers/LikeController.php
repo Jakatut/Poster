@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Like;
+use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,16 +27,28 @@ class LikeController extends Controller
     }
 
     /**
-     * Create a new blog post.
+     * Create a new like.
      *
      * @param  Request  $request
-     * @param  Int      $id
+     * @param  Int      $postId
      * @return Response
      */
-    public function create(Request $request, $id)
+    public function create(Request $request, $postId)
     {
         $user = $request->user();
-        $like = new Like(['user_id' => $user->id, 'post_id' => $id]);
+        $post = Post::find($postId);
+        if (empty($post)) {
+            return new Response('Post not found.', 404);
+        }
+
+        // Check if the like already exists.
+        $likeData = ['user_id' => $user->id, 'post_id' => $postId];
+        $like = Like::find($likeData);
+        if (!empty($like)) {
+            return new Response('', 200);
+        }
+
+        $like = new Like($likeData);
         $like->save();
         $uri = $this->getUri($request, $like->id);
         return (new Response(''))->header('Resource-Location', $uri);
@@ -44,14 +57,14 @@ class LikeController extends Controller
     /**
      * Get a list of all likes.
      *
-     * @param Int   $id
+     * @param Int   $postId
      * @return Response|JsonResponse
      */
-    public function find($id)
+    public function find($postId)
     {
-        $likes = Like::all()->where('post_id', '=', $id);
+        $likes = Like::all()->where('post_id', '=', $postId);
         if (count($likes) == 0) {
-            return new Response('', 404);
+            return new Response('Likes not found.', 404);
         }
         return new JsonResponse($likes, 200);
     }
@@ -64,10 +77,9 @@ class LikeController extends Controller
      */
     public function delete($id)
     {
-
         $like = Like::find($id);
         if (!$like) {
-            return new Response('', 404);
+            return new Response('Like not found.', 404);
         }
 
         $like->delete();

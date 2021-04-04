@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Traits\ImageStorageTrait;
 use App\Traits\UriTrait;
-
+use Google\Cloud\Storage\Connection\Rest;
 
 class CommentController extends Controller
 {
@@ -39,6 +40,10 @@ class CommentController extends Controller
     {
         $this->ValidateComment($request, true);
         $user = $request->user();
+        $post = Post::find($id);
+        if (empty($post)) {
+            return new Response('Post not found', 404);
+        }
         $comment = new Comment(array_merge($request->all(), ['post_id' => $id, 'user_id' => $user->id]));
 
         if ($request->hasFile('image')) {
@@ -61,7 +66,7 @@ class CommentController extends Controller
     {
         $comments = Comment::all()->where('post_id', '=', $id);
         if (count($comments) == 0) {
-            return new Response('', 404);
+            return new Response('Comments not found.', 404);
         }
         return new JsonResponse($comments, 200);
     }
@@ -79,7 +84,7 @@ class CommentController extends Controller
         $comment = Comment::find($id);
 
         if (empty($comment)) {
-            return new Response('', 404);
+            return new Response('Comment not found.', 404);
         }
 
         // If an image was provided, save it to cloud storage and delete the previous image.        
@@ -104,7 +109,7 @@ class CommentController extends Controller
 
         $comment = Comment::find($id);
         if (!$comment) {
-            return new Response('', 404);
+            return new Response('Comment not found.', 404);
         }
 
         $comment->delete();
