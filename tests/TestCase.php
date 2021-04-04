@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Artisan;
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\TestCase as BaseTestCase;
 
@@ -37,18 +38,20 @@ abstract class TestCase extends BaseTestCase
         parent::setup();
 
         if (!static::$migrationsRun) {
-            $this->artisan('migrate:refresh');
-            $this->artisan('db:seed');
+            // Run migrations and seed the database on the first test setup only.
+            Artisan::call('migrate:refresh');
+            Artisan::call('db:seed');
             static::$migrationsRun = true;
         }
 
+        // Setup user data.
         $users = User::factory(\App\Models\User::class)->times(2)->create();
-        
         $this->loggedInUser = $users[0];
         $this->user = $users[1];
         $this->headers = [
             'Authorization' => "Token {$this->loggedInUser->token}"
         ];
+        $this->actingAs($this->loggedInUser);
     }
 
     protected function postMultipartFormData($uri, $data = [], $files = [], $headers = [])
